@@ -1,5 +1,5 @@
+from pathlib import Path
 
-# 模型配置
 MODEL_CONFIG = {
     "model_name": "Qwen/Qwen2.5-3B",
     "model_chat_name": "Qwen/Qwen2.5-3B-Instruct",
@@ -59,3 +59,23 @@ DEEPSPEED_CONFIG = {
         },
     },
 }
+
+REF_DEEPSPEED_CONFIG = {
+    "bf16": {"enabled": True},
+    # Note that we don't train the reference model
+    # These are just for compatibility with DeepSpeed.
+    "train_batch_size": TRAINING_CONFIG["episodes_per_iteration"],
+    "train_micro_batch_size_per_gpu": TRAINING_CONFIG["per_device_batch_size"],
+    "gradient_accumulation_steps": TRAINING_CONFIG["episodes_per_iteration"] // TRAINING_CONFIG["per_device_batch_size"],
+}
+
+RUN_NAME = "r1-zero"
+EXP_DIR = Path.home() / "scratch" / "deepseek_r1z_hackathon" / RUN_NAME
+
+def init_experiment_dir():
+    try:
+        EXP_DIR.mkdir(parents=True, exist_ok=True)
+        print(f"Logs and Checkpoints will be saved to: {EXP_DIR}")
+    except Exception as e:
+        print(f"Error creating experiment directory: {e}")
+        raise

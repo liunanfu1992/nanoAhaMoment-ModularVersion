@@ -3,8 +3,8 @@ from typing import Dict, Tuple, Union
 from deepspeed import DeepSpeedEngine
 from transformers import PreTrainedModel
 from src.utils.utils import compute_token_log_probs
+from src.config.configs import *
 
-KL_COEFFICIENT=0.001
 
 def compute_pg_loss(policy_model:Union[DeepSpeedEngine,PreTrainedModel],
                     reference_model:Union[DeepSpeedEngine,PreTrainedModel],
@@ -25,9 +25,9 @@ def compute_pg_loss(policy_model:Union[DeepSpeedEngine,PreTrainedModel],
     labels_mask=(labels[...,1:] != -100).float()
 
     with torch.no_grad():
-        ref_logps=compute_token_log_probs(reference_model,model_inputs,TEMPERATURE=1.0)
+        ref_logps=compute_token_log_probs(reference_model,model_inputs,SAMPLING_CONFIG["temperature"])
     
-    logps=compute_token_log_probs(policy_model,model_inputs,TEMPERATURE=1.0)
+    logps=compute_token_log_probs(policy_model,model_inputs,SAMPLING_CONFIG["temperature"])
 
     kl_penalty=torch.exp(ref_logps-logps)-(ref_logps-logps)-1
     kl_penalty=kl_penalty*labels_mask
@@ -37,7 +37,7 @@ def compute_pg_loss(policy_model:Union[DeepSpeedEngine,PreTrainedModel],
     policy_loss=-logps*advantages[...,1:]
     policy_loss=policy_loss*labels_mask
 
-    loss=(policy_loss+kl_penalty*KL_COEFFICIENT).sum()/total_response_len
+    loss=(policy_loss+kl_penalty*TRAINING_CONFIG["kl_coefficient"]).sum()/total_response_len
 
     metrics = {
         "policy_loss": policy_loss.sum().item() / total_response_len,

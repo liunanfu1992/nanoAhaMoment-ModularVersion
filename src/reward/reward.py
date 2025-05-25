@@ -1,15 +1,12 @@
 import re
 from typing import Any, Dict, List
-from tokenizers import AutoTokenizer
-from configs.config import MODEL_CONFIG
+from src.model.model_tokenizer import ModelTokenizer
 
-def format_reward_func(completion:str)->float:
+def format_reward_func(completion:str,tokenizer:ModelTokenizer)->float:
     try:
         completion="<think>"+completion
 
-        tokenizer=AutoTokenizer.from_pretrained(MODEL_CONFIG["model_name"])
-        EOS_TOKEN_ID = AutoTokenizer.from_pretrained(MODEL_CONFIG["model_chat_name"]).eos_token_id
-        EOS_TOKEN = tokenizer.convert_ids_to_tokens(EOS_TOKEN_ID)
+        _,EOS_TOKEN=tokenizer.get_eos_token_and_id()
         
         if completion.endswith(EOS_TOKEN):
             completion=completion[:-len(EOS_TOKEN)]

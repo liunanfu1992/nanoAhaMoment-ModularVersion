@@ -2,6 +2,9 @@ from typing import Dict,Any
 from transformers import AutoTokenizer
 from datasets import load_dataset
 from .prompt import SYSTEM_MESSAGE,PROMPT_TEMPLATE
+from src.config.configs import DATASET_CONFIG
+from src.model.model_tokenizer import ModelTokenizer
+
 
 def preprocess_example(example:Dict[str,Any],tokenizer:AutoTokenizer):
     numbers=example["nums"]
@@ -19,15 +22,15 @@ def preprocess_example(example:Dict[str,Any],tokenizer:AutoTokenizer):
 
     return {"prompt":prompt,"input_ids":input_ids}
 
-def load_and_preprocess_dataset(dataset_name:str,model_name:str,test_size:int=500,seed:int=42):
+def load_and_preprocess_dataset(tokenizer:ModelTokenizer):
     
-    tokenizer=AutoTokenizer.from_pretrained(model_name)
-    dataset=load_dataset(dataset_name,split="train")
+    dataset=load_dataset(DATASET_CONFIG["dataset_name"],split="train")
     dataset=dataset.map(
-        lambda x: preprocess_example(x,tokenizer),
+        lambda x: preprocess_example(x,tokenizer.getModelChatTokenizer()), # 这个tokenizer是model_chat_tokenizer
         num_proc=6
     )
-    train_test_split=dataset.train_test_split(test_size=test_size,seed=seed)
+
+    train_test_split=dataset.train_test_split(test_size=DATASET_CONFIG["test_size"],seed=DATASET_CONFIG["seed"])
 
     return {
         "train":train_test_split["train"],

@@ -1,20 +1,19 @@
-
 from typing import Any, Dict, List, Tuple
 import numpy as np
-from transformers import AutoTokenizer
+from src.config.configs import *
+from src.reward.reward import compute_reward
+from src.model.model_tokenizer import ModelTokenizer
 
-from src.data.reward import compute_reward
 
 
-
-def create_training_episodes(sample:List[Dict[str,Any]],all_generations:List[List[int]],all_finish_reasons:List[str],tokenizer:AutoTokenizer,GENERATIONS_PER_SAMPLE:int=4)->Tuple[Dict[str,Any],Dict[str,Any]]:
+def create_training_episodes(sample:List[Dict[str,Any]],all_generations:List[List[int]],all_finish_reasons:List[str],tokenizer:ModelTokenizer)->Tuple[Dict[str,Any],Dict[str,Any]]:
     
     assert len(all_generations)==len(all_finish_reasons)
-    assert len(all_generations)==len(sample)*GENERATIONS_PER_SAMPLE
+    assert len(all_generations)==len(sample)*TRAINING_CONFIG["generations_per_sample"]
 
     groups=[
-        list(range(i,i+GENERATIONS_PER_SAMPLE))
-        for i in range(0,len(all_generations),GENERATIONS_PER_SAMPLE)
+        list(range(i,i+TRAINING_CONFIG["generations_per_sample"]))
+        for i in range(0,len(all_generations),TRAINING_CONFIG["generations_per_sample"])
     ]
 
     all_query_token_ids,all_responses_token_ids,all_advantages=[],[],[]
@@ -28,7 +27,7 @@ def create_training_episodes(sample:List[Dict[str,Any]],all_generations:List[Lis
     for sample,group_indices in zip(sample,groups):
         finish_reasons=[all_finish_reasons[i] for i in group_indices]
         response_token_ids=[all_generations[i] for i in group_indices]
-        responses=tokenizer.decode(response_token_ids,skip_special_tokens=False)
+        responses=tokenizer.getModelChatTokenizer().batch_decode(response_token_ids,skip_special_tokens=False)
         
         rewards_and_metrics=[compute_reward(response,sample) for response in responses]
         rewards,reward_metrics=zip(*rewards_and_metrics)
@@ -41,7 +40,7 @@ def create_training_episodes(sample:List[Dict[str,Any]],all_generations:List[Lis
             for resp_adv,resp in zip(response_advantages,response_token_ids)
         ]
         
-        all_query_token_ids.extend([sample["input_ids"]]*GENERATIONS_PER_SAMPLE)
+        all_query_token_ids.extend([sample["input_ids"]]*TRAINING_CONFIG["generations_per_sample"])
         all_responses_token_ids.extend(response_token_ids)
         all_advantages.extend(advantages)
 

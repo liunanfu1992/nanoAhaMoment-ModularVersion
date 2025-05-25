@@ -51,8 +51,8 @@ def compute_token_log_probs(
 )->torch.Tensor:
     
     outputs=model(
-        input_ids=input["input_ids"],
-        attention_mask=input["attention_mask"],
+        input_ids=inputs["input_ids"],
+        attention_mask=inputs["attention_mask"],
         return_dict=True,
         use_cache=False
     )

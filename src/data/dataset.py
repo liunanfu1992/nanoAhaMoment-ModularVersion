@@ -35,5 +35,4 @@ def load_and_preprocess_dataset(tokenizer:ModelTokenizer):
     return {
         "train":train_test_split["train"],
         "test":train_test_split["test"],
-        "tokenizer":tokenizer
     }

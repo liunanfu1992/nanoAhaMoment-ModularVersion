@@ -6,10 +6,15 @@ from src.config.configs import *
 
 
 def load_model():
+    import os
+    os.environ["MASTER_ADDR"] = "localhost"
+    os.environ["MASTER_PORT"] = "29500"
+    os.environ["RANK"] = "0"
+    os.environ["WORLD_SIZE"] = "1"
     policy_model=AutoModelForCausalLM.from_pretrained(
         MODEL_CONFIG["model_name"],
         torch_dtype=torch.bfloat16,
-        device_map="0",
+        device_map="cuda:0",
         attn_implementation="flash_attention_2",
     )
 
@@ -17,7 +22,7 @@ def load_model():
         MODEL_CONFIG["model_name"],
         attn_implementation="flash_attention_2",
         torch_dtype=torch.bfloat16,
-        device_map=0,
+        device_map="cuda:0",
     )
     policy_model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
 

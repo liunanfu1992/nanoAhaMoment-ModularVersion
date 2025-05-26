@@ -1,0 +1,11 @@
+torch==2.5.1
+https://github.com/Dao-AILab/flash-attention/releases/download/v2.7.2.post1/flash_attn-2.7.2.post1+cu12torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+vllm==0.7.3
+transformers==4.48.3
+accelerate==1.4.0
+datasets==3.3.2
+deepspeed==0.16.4
+wandb==0.19.7
+ipykernel==6.29.5
+ipywidgets==8.1.5
+jupyter==1.1.1

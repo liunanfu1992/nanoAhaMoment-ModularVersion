@@ -11,12 +11,16 @@ from src.model.model_tokenizer import ModelTokenizer
 from src.data.dataset import load_and_preprocess_dataset
 from src.training.episode import create_training_episodes
 from src.training.loss import compute_pg_loss
+import os
+
 
 if __name__ == "__main__":
     policy_model,reference_model,inference_engine=load_model()
     tokenizer=ModelTokenizer()
     EOS_TOKEN_ID,EOS_TOKEN=tokenizer.get_eos_token_and_id()
-    train_dataset,test_dataset,tokenizer=load_and_preprocess_dataset(tokenizer)
+    dataset=load_and_preprocess_dataset(tokenizer)
+    train_dataset=dataset["train"]
+    test_dataset=dataset["test"]
 
     wandb.init(
         project="r1-aha-moment",
@@ -59,7 +63,7 @@ if __name__ == "__main__":
             eval_episodes, eval_stats = evaluate_on_test_set(
                 inference_engine=inference_engine,
                 test_dataset=test_dataset,
-                tokenizer=tokenizer,
+                tokenizer=tokenizer.getModelChatTokenizer(),
                 eos_token=EOS_TOKEN,
                 eval_sampling_params=SamplingParams(
                     temperature=0.3,
@@ -69,14 +73,14 @@ if __name__ == "__main__":
                     stop_token_ids=[EOS_TOKEN_ID],
                 ),
                 reward_func=lambda completion, sample: compute_reward(
-                    completion, sample
+                    completion, sample, tokenizer
                 ),
             )
             eval_episode_table = dump_episodes(
                 episodes=eval_episodes,
                 episodes_stats=eval_stats,
                 exp_dir=EXP_DIR,
-                tokenizer=tokenizer,
+                tokenizer=tokenizer.getModelChatTokenizer(),
                 iteration=iteration,
                 is_eval=True,
             )
@@ -130,7 +134,7 @@ if __name__ == "__main__":
             episodes=episodes,
             episodes_stats=episodes_stats,
             exp_dir=EXP_DIR,
-            tokenizer=tokenizer,
+            tokenizer=tokenizer.getModelChatTokenizer(),
             iteration=iteration,
         )
 

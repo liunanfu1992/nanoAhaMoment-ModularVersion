@@ -53,12 +53,12 @@ def equation_reward_func(completion:str,nums:List[int],target:int)->float:
     except Exception:
         return 0.0
         
-def compute_reward(completion:str,sample:Dict[str,Any])->float:
+def compute_reward(completion:str,sample:Dict[str,Any],tokenizer:ModelTokenizer)->float:
     nums=sample["nums"]
     target=sample["target"]
 
     equation_reward=equation_reward_func(completion,nums,target)
-    format_reward=format_reward_func(completion)
+    format_reward=format_reward_func(completion,tokenizer)
 
     reward=equation_reward+format_reward
 

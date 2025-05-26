@@ -29,7 +29,7 @@ def create_training_episodes(sample:List[Dict[str,Any]],all_generations:List[Lis
         response_token_ids=[all_generations[i] for i in group_indices]
         responses=tokenizer.getModelChatTokenizer().batch_decode(response_token_ids,skip_special_tokens=False)
         
-        rewards_and_metrics=[compute_reward(response,sample) for response in responses]
+        rewards_and_metrics=[compute_reward(response,sample,tokenizer) for response in responses]
         rewards,reward_metrics=zip(*rewards_and_metrics)
 
         rewards=np.array(rewards)

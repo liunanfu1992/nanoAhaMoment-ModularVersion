@@ -17,6 +17,7 @@ import os
 if __name__ == "__main__":
     policy_model,reference_model,inference_engine=load_model()
     tokenizer=ModelTokenizer()
+    init_experiment_dir()
     EOS_TOKEN_ID,EOS_TOKEN=tokenizer.get_eos_token_and_id()
     dataset=load_and_preprocess_dataset(tokenizer)
     train_dataset=dataset["train"]

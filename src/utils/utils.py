@@ -178,40 +178,6 @@ def evaluate_on_test_set(
     eval_sampling_params: SamplingParams,
     reward_func: Callable[[str, Dict[str, Any]], Tuple[float, Dict[str, float]]],
 ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-    """
-    Evaluate the model on a test dataset by generating responses and computing rewards.
-
-    Args:
-        inference_engine: The sglang Engine instance used for text generation
-        test_dataset: Dataset containing test samples
-        tokenizer: Tokenizer for decoding generated token IDs
-        eos_token: End of sequence token string
-        eval_sampling_params: Dictionary of parameters for controlling the generation process
-        reward_func: Function that computes rewards for generated responses. Takes a response
-            string and sample dict as input, returns a tuple of (overall_reward, reward_components)
-
-    Returns:
-        Dictionary containing evaluation statistics:
-            - response_lengths: List of token counts for each generated response
-            - rewards: List of overall reward values for each response
-            - non_stop_rate: List of booleans indicating if generation ended for non-stop reason
-            - reward_metrics/*: Lists of individual reward component values, prefixed with
-              "reward_metrics/"
-        episodes: Dictionary containing:
-            - all_query_token_ids: List of query token IDs for each episode
-            - all_response_token_ids: List of response token IDs for each episode
-
-    Example:
-        >>> episodes, episodes_stats = evaluate_on_test_set(
-        ...     inference_engine=engine,
-        ...     test_dataset=dataset,
-        ...     tokenizer=tokenizer,
-        ...     eos_token="</s>",
-        ...     eval_sampling_params={"temperature": 0.7, "max_tokens": 100},
-        ...     reward_func=compute_rewards
-        ... )
-        >>> print(f"Average reward: {episodes_stats['rewards']:.3f}")
-    """
     generations = inference_engine.generate(
         prompt_token_ids=test_dataset["input_ids"], sampling_params=eval_sampling_params
     )
